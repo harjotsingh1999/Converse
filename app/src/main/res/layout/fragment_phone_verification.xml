@@ -62,6 +62,7 @@
         app:layout_constraintTop_toBottomOf="@id/login_screen_welcome_text" />
 
     <TextView
+        android:transitionName="text_transition"
         android:id="@+id/enter_otp_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,6 +78,7 @@
 
 
     <com.chaos.view.PinView
+        android:transitionName="mobile_number_transition"
         android:id="@+id/login_screen_pin_view"
         style="@style/PinWidget.PinView"
         android:layout_width="wrap_content"
@@ -104,6 +106,7 @@
 
 
     <com.google.android.material.button.MaterialButton
+        android:transitionName="button_transition"
         android:id="@+id/login_screen_go_button"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="match_parent"

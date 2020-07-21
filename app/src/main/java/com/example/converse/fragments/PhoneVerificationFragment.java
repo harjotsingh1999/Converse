@@ -26,6 +26,8 @@ import com.chaos.view.PinView;
 import com.example.converse.Activities.HomeActivity;
 import com.example.converse.Activities.LoginActivity;
 import com.example.converse.R;
+import com.example.converse.Utility.Constants;
+import com.example.converse.Utility.SharedPref;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
@@ -215,6 +217,7 @@ public class PhoneVerificationFragment extends Fragment {
                 if(firebaseUser.getDisplayName()==null || firebaseUser.getPhotoUrl()==null)
                 {
                     Log.e(TAG, "onSuccess: new user signIn sending to new user fragment" );
+                    SharedPref.getSharedPrefEditor(context).putString(Constants.KEY_USER_MOBILE_NUMBER,userPhoneNumber).apply();
                     FragmentManager fragmentManager=getFragmentManager();
                     assert fragmentManager != null;
                     FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();

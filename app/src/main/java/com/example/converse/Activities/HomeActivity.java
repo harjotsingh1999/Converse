@@ -1,10 +1,15 @@
 package com.example.converse.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.example.converse.Adapters.HomeFragmentsPagerAdapter;
@@ -16,12 +21,14 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String TAG = "HomeActivity";
     MaterialToolbar toolbar;
     ViewPager homeViewPager;
     TabLayout homeTabLayout;
     HomeFragmentsPagerAdapter fragmentsPagerAdapter;
     FirebaseAuth mAuth;
     FirebaseUser firebaseUser;
+    FirebaseAuth.AuthStateListener authStateListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +43,23 @@ public class HomeActivity extends AppCompatActivity {
         fragmentsPagerAdapter=new HomeFragmentsPagerAdapter(getSupportFragmentManager());
         homeViewPager.setAdapter(fragmentsPagerAdapter);
         homeTabLayout.setupWithViewPager(homeViewPager);
+
+        authStateListener=new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user=firebaseAuth.getCurrentUser();
+                if(user==null)
+                {
+                    mAuth.signOut();
+                    Log.d(TAG, "onAuthStateChanged: successfully signed out");
+                    sendUserToLoginActivity();
+                }
+                else
+                {
+                    Log.d(TAG, "onAuthStateChanged: user signed in with used id "+user.getUid());
+                }
+            }
+        };
     }
 
 
@@ -48,8 +72,44 @@ public class HomeActivity extends AppCompatActivity {
 
         if(firebaseUser==null)
         {
-            startActivity(new Intent(HomeActivity.this,LoginActivity.class));
-            finish();
+            sendUserToLoginActivity();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+         super.onCreateOptionsMenu(menu);
+         getMenuInflater().inflate(R.menu.options_menu,menu);
+         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        super.onOptionsItemSelected(item);
+        int id=item.getItemId();
+        switch (id)
+        {
+            case R.id.menu_settings:
+                sendUserToSettingsActivity();
+                return true;
+            case R.id.menu_sign_out:
+                mAuth.signOut();
+                sendUserToLoginActivity();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public void sendUserToLoginActivity()
+    {
+        Log.d(TAG, "sendUserToLoginActivity: called");
+        startActivity(new Intent(HomeActivity.this,LoginActivity.class));
+        finish();
+    }
+    public void sendUserToSettingsActivity()
+    {
+        Log.d(TAG, "sendUserToSettingsActivity: called");
+        startActivity(new Intent(HomeActivity.this,SettingsActivity.class));
     }
 }

@@ -26,6 +26,8 @@ import android.widget.Toast;
 import com.example.converse.Activities.HomeActivity;
 import com.example.converse.HelperClasses.UserInformation;
 import com.example.converse.R;
+import com.example.converse.Utility.Constants;
+import com.example.converse.Utility.SharedPref;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -123,7 +125,7 @@ public class NewUserFragment extends Fragment {
             public void onClick(View view) {
                 if(validateUserName() && profileImageUri!=null)
                 {
-                    userName=userNameEditText.getText().toString();
+                    userName=userNameEditText.getText().toString().trim();
                     if(!imageUploaded) //if image is not uploaded then nothing is done
                         uploadImage();
                     else if(!userUpdated)   //this means that image is uploaded but user profile is not updated
@@ -238,6 +240,8 @@ public class NewUserFragment extends Fragment {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             Log.d(TAG, "onComplete: user added to database");
+                            SharedPref.getSharedPrefEditor(context).putString(Constants.KEY_USER_NAME,userName).apply();
+                            SharedPref.getSharedPrefEditor(context).putString(Constants.KEY_USER_PROFILE_IMAGE_URL,profileImageUri.toString()).apply();
                             progressDialog.dismiss();
                             addedUserToDatabase=true;
                             Toast.makeText(context,"Welcome", Toast.LENGTH_SHORT).show();
@@ -260,7 +264,7 @@ public class NewUserFragment extends Fragment {
         String name=userNameEditText.getText().toString();
         if(name.equals(""))
         {
-            userNameLayout.setBoxStrokeErrorColor(getResources().getColorStateList(R.color.black,null));
+            userNameLayout.setBoxStrokeErrorColor(getResources().getColorStateList(R.color.colorPrimaryDark,null));
             userNameLayout.setError("Enter name");
             return false;
         }
