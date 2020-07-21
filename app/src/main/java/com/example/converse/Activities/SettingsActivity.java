@@ -35,8 +35,11 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -91,12 +94,6 @@ public class SettingsActivity extends AppCompatActivity {
         updateSettingsButton=findViewById(R.id.settings_activity_update_button);
         progressDialog=new ProgressDialog(this);
 
-        userImageUrl=SharedPref.getSharedPref(this).getString(Constants.KEY_USER_PROFILE_IMAGE_URL,"");
-        Picasso.get().load(Uri.parse(userImageUrl)).placeholder(getDrawable(R.drawable.user_profile_image)).into(userImageView);
-        userName=SharedPref.getSharedPref(this).getString(Constants.KEY_USER_NAME, "");
-        userNameEditText.setText(userName);
-        userPhone=SharedPref.getSharedPref(this).getString(Constants.KEY_USER_MOBILE_NUMBER,"");
-        userPhoneTextView.setText(userPhone);
 
         mAuth=FirebaseAuth.getInstance();
         firebaseUser=mAuth.getCurrentUser();
@@ -105,6 +102,7 @@ public class SettingsActivity extends AppCompatActivity {
         firebaseDatabase=FirebaseDatabase.getInstance();
         databaseReference=firebaseDatabase.getReference("users");
 
+        getUserDetailsFromFirebase();
 
         selectImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,6 +148,31 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void getUserDetailsFromFirebase()
+    {
+        DatabaseReference user=databaseReference.child(firebaseUser.getUid());
+        user.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d(TAG, "onDataChange: user details snapshot "+snapshot);
+                userImageUrl= snapshot.child("profileImageUrl").getValue().toString();
+                userName= snapshot.child("userName").getValue().toString();
+                userPhone= snapshot.child("phoneNumber").getValue().toString();
+
+                Picasso.get().load(Uri.parse(userImageUrl)).placeholder(getDrawable(R.drawable.user_profile_image)).into(userImageView);
+                userNameEditText.setText(userName);
+                userPhoneTextView.setText(userPhone);
+                Log.e(TAG, "getUserDetailsFromFirebase: imageUrl name and phone"+ firebaseUser.getPhotoUrl()+" "+firebaseUser.getDisplayName()+" "+firebaseUser.getPhoneNumber() );
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void uploadImage()
     {
         if(!isImageUploaded) {

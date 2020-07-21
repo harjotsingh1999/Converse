@@ -2,13 +2,17 @@ package com.example.converse.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -22,6 +26,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "HomeActivity";
+    public static final int REQUEST_CONTACTS_PERMISSION_CODE=10;
     MaterialToolbar toolbar;
     ViewPager homeViewPager;
     TabLayout homeTabLayout;
@@ -43,6 +48,7 @@ public class HomeActivity extends AppCompatActivity {
         fragmentsPagerAdapter=new HomeFragmentsPagerAdapter(getSupportFragmentManager());
         homeViewPager.setAdapter(fragmentsPagerAdapter);
         homeTabLayout.setupWithViewPager(homeViewPager);
+        homeViewPager.setOffscreenPageLimit(2);
 
         authStateListener=new FirebaseAuth.AuthStateListener() {
             @Override
@@ -60,6 +66,8 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         };
+
+        checkPermissions();
     }
 
 
@@ -111,5 +119,18 @@ public class HomeActivity extends AppCompatActivity {
     {
         Log.d(TAG, "sendUserToSettingsActivity: called");
         startActivity(new Intent(HomeActivity.this,SettingsActivity.class));
+    }
+
+    private void checkPermissions()
+    {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)== PackageManager.PERMISSION_DENIED)
+        {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_CONTACTS},REQUEST_CONTACTS_PERMISSION_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

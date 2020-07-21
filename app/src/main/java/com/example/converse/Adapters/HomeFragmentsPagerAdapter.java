@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.converse.fragments.CallsFragment;
+import com.example.converse.fragments.ContactsFragment;
 import com.example.converse.fragments.ChatsFragment;
 import com.example.converse.fragments.StatusFragment;
 
@@ -26,7 +26,7 @@ public class HomeFragmentsPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return new StatusFragment();
             case 2:
-                return new CallsFragment();
+                return new ContactsFragment();
             default:
                 return new ChatsFragment();
         }
@@ -42,11 +42,13 @@ public class HomeFragmentsPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return "Status";
             case 2:
-                return "Calls";
+                return "Contacts";
             default:
                 return null;
         }
     }
+
+
 
     @Override
     public int getCount() {

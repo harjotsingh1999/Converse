@@ -1,5 +1,7 @@
 package com.example.converse.HelperClasses;
 
+import android.provider.Contacts;
+
 public class UserInformation {
 
     public String phoneNumber, userName, profileImageUrl;
@@ -8,6 +10,11 @@ public class UserInformation {
         this.phoneNumber = phoneNumber;
         this.userName = userName;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public UserInformation()
+    {
+
     }
 
     public String getPhoneNumber() {
