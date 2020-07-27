@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorPrimaryDark"
+    android:theme="@style/Widget.MaterialComponents.Toolbar"
+    android:elevation="10dp"
+    android:gravity="center">
+
+
+    <TextView
+        android:id="@+id/chat_toolbar_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fontFamily="@font/aclonica"
+        android:gravity="center_vertical"
+        tools:text="User Name"
+        android:textSize="25sp" />
+
+</com.google.android.material.appbar.MaterialToolbar>

@@ -4,7 +4,7 @@ import android.provider.Contacts;
 
 public class UserInformation {
 
-    public String phoneNumber, userName, profileImageUrl;
+    public String phoneNumber, userName, profileImageUrl, userId;
 
     public UserInformation(String phoneNumber, String userName, String profileImageUrl) {
         this.phoneNumber = phoneNumber;
@@ -39,5 +39,13 @@ public class UserInformation {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -22,6 +22,14 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -34,6 +42,12 @@ public class HomeActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser firebaseUser;
     FirebaseAuth.AuthStateListener authStateListener;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference currentUserChats;
+
+    public static HashMap<String, String> userChats=new HashMap<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +55,17 @@ public class HomeActivity extends AppCompatActivity {
 
         toolbar=findViewById(R.id.home_activity_toolbar);
         setSupportActionBar(toolbar);
+
+        mAuth=FirebaseAuth.getInstance();
+        firebaseUser=mAuth.getCurrentUser();
+
+        if(firebaseUser==null)
+        {
+            sendUserToLoginActivity();
+        }
+
+        firebaseDatabase=FirebaseDatabase.getInstance();
+        currentUserChats=firebaseDatabase.getReference("users").child(firebaseUser.getUid()).child("chats");
 
         homeViewPager=findViewById(R.id.home_activity_viewpager);
         homeTabLayout=findViewById(R.id.home_Activity_tab_layout);
@@ -68,6 +93,41 @@ public class HomeActivity extends AppCompatActivity {
         };
 
         checkPermissions();
+        getUserChatsFromDatabase();
+    }
+
+
+    private void getUserChatsFromDatabase()
+    {
+        Log.d(TAG, "getUserChatsFromDatabase: called");
+        currentUserChats.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists())
+                {
+                    Log.d(TAG, "onDataChange: getting user chats hashMap "+snapshot);
+                    for(DataSnapshot dataSnapshot:snapshot.getChildren())
+                    {
+                        String chatId=dataSnapshot.getKey();
+                        if(dataSnapshot.hasChild("userId") && dataSnapshot.child("userId").getValue()!=null) {
+                            String secondPersonUserId = dataSnapshot.child("userId").getValue().toString();
+                            userChats.put(secondPersonUserId, chatId);
+                        }
+                    }
+                }
+                else
+                {
+                    Log.e(TAG, "onDataChange: snapshot not found" );
+                }
+                Log.e(TAG, "onDataChange: home activity user chats "+userChats );
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Log.e(TAG, "onCancelled: database error "+ error.getMessage() );
+            }
+        });
     }
 
 
@@ -75,13 +135,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mAuth=FirebaseAuth.getInstance();
-        firebaseUser=mAuth.getCurrentUser();
 
-        if(firebaseUser==null)
-        {
-            sendUserToLoginActivity();
-        }
     }
 
     @Override

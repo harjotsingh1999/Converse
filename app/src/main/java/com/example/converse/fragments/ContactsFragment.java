@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.converse.Adapters.ContactsRecyclerAdapter;
 import com.example.converse.HelperClasses.UserInformation;
@@ -38,6 +39,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class ContactsFragment extends Fragment {
@@ -50,12 +52,15 @@ public class ContactsFragment extends Fragment {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference usersDatabaseReference;
     DatabaseReference currentUserDatabaseReference;
+    DataSnapshot appUsersDataSnapshot;
 
     ArrayList<UserInformation> userContacts, appUserContacts;
     LinearLayout emptyView, noPermissionView;
     RecyclerView recyclerView;
     TextView givePermissionText;
     ProgressBar progressBar;
+    UserInformation currentUser;
+    HashMap<String, String> contactsMap=new HashMap<>();
 
     ContactsRecyclerAdapter contactsRecyclerAdapter;
     RecyclerView.LayoutManager layoutManager;
@@ -98,12 +103,33 @@ public class ContactsFragment extends Fragment {
         recyclerView.setVisibility(View.GONE);
         noPermissionView.setVisibility(View.GONE);
 
-        checkPermissions();
+        getCurrentUser();
+        getAppUsersFromDatabase();
 
         givePermissionText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS}, REQUEST_CONTACTS_PERMISSION_CODE);
+            }
+        });
+    }
+
+    private void getCurrentUser()
+    {
+        currentUserDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists())
+                {
+                    currentUser=snapshot.getValue(UserInformation.class);
+                    assert currentUser != null;
+                    currentUser.setUserId(snapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
@@ -135,53 +161,67 @@ public class ContactsFragment extends Fragment {
                 checkIfThisUserIsInDatabase(phoneNum, name);
             }
         }
+        contact.close();
+        setUpRecyclerView();
+    }
 
-        if (appUserContacts.isEmpty()) {
-            Log.d(TAG, "getUserContacts: no app user found");
-            emptyView.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
-        } else {
-            setUpRecyclerView();
-        }
+    private void getAppUsersFromDatabase() {
+        Log.d(TAG, "getAppUsersFromDatabase: called");
+        usersDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    appUsersDataSnapshot = snapshot;
+                    checkPermissions();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(context, "Error getting users list from database", Toast.LENGTH_SHORT).show();
+                setUpRecyclerView();
+            }
+        });
     }
 
     private void checkIfThisUserIsInDatabase(final String phone, final String name) {
         Log.d(TAG, "checkIfThisUserIsInDatabase: with phone " + phone);
 
-        usersDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    //Log.d(TAG, "onDataChange: datasnapshot "+dataSnapshot.toString());
-                    if (dataSnapshot.child("phoneNumber").getValue().toString().contains(phone)) {
-                        Log.d(TAG, "onDataChange: this person uses app and is in contacts " + dataSnapshot.toString());
-                        UserInformation userInformation = new UserInformation(dataSnapshot.child("phoneNumber").getValue().toString(),
-                                name,
-                                dataSnapshot.child("profileImageUrl").getValue().toString());
-                        appUserContacts.add(userInformation);
-                    }
+        for (DataSnapshot dataSnapshot : appUsersDataSnapshot.getChildren()) {
+            Log.d(TAG, "onDataChange: datasnapshot "+dataSnapshot.toString());
+            if (dataSnapshot.child("phoneNumber").getValue() != null) {
+                if (dataSnapshot.child("phoneNumber").getValue().toString().contains(phone)) {
+                    Log.d(TAG, "onDataChange: this person uses app and is in contacts " + dataSnapshot.toString());
+                    UserInformation userInformation = new UserInformation(dataSnapshot.child("phoneNumber").getValue().toString(),
+                            name,
+                            dataSnapshot.child("profileImageUrl").getValue().toString());
+                    userInformation.setUserId(dataSnapshot.getKey());
+                    appUserContacts.add(userInformation);
                 }
-                setUpRecyclerView();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: database event listener cancelled " + error);
-            }
-        });
+        }
     }
+
 
     private void setUpRecyclerView() {
         Log.d(TAG, "setUpRecyclerView: called");
-        contactsRecyclerAdapter = new ContactsRecyclerAdapter(appUserContacts, context);
-        layoutManager = new LinearLayoutManager(context);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(contactsRecyclerAdapter);
-        recyclerView.setVisibility(View.VISIBLE);
         noPermissionView.setVisibility(View.GONE);
-        emptyView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
+        if (appUserContacts.isEmpty()) {
+            Log.d(TAG, "getUserContacts: no app user found");
+            emptyView.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            contactsRecyclerAdapter = new ContactsRecyclerAdapter(appUserContacts, context, currentUser);
+            layoutManager = new LinearLayoutManager(context);
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(contactsRecyclerAdapter);
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
+
+        }
+
     }
 
     @Override
@@ -207,6 +247,7 @@ public class ContactsFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CONTACTS_PERMISSION_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "checkPermissions: permission given");
+            progressBar.setVisibility(View.VISIBLE);
             getUserContacts();
         } else {
             Log.d(TAG, "checkPermissions: permission not given");

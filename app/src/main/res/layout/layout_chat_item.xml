@@ -8,7 +8,7 @@
     app:cardElevation="10dp">
 
     <LinearLayout
-        android:id="@+id/contact_item_card_view"
+        android:id="@+id/chat_item_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground"
@@ -18,7 +18,7 @@
         android:padding="10dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/contact_item_image_view"
+            android:id="@+id/chat_item_image_view"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:src="@drawable/user_profile_image" />
@@ -31,7 +31,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/contact_item_name_text_view"
+                android:id="@+id/chat_item_name_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
@@ -40,12 +40,14 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/contact_item_phone_text_view"
+                android:id="@+id/chat_item_last_message_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
+                android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:text="User Phone"
+                android:maxLines="1"
+                android:text="Last message"
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
