@@ -3,17 +3,36 @@
     android:id="@+id/item_receiver_message_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="start"
     android:layout_marginVertical="10dp"
     android:layout_marginStart="20dp"
     android:layout_marginEnd="100dp"
-    android:layout_gravity="start"
     android:background="@drawable/chat_background"
     android:padding="10dp">
+
+
+    <TextView
+        android:id="@+id/sender_name_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="Sender name"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/media_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/sender_name_text_view"
+        android:src="@drawable/chatting_image"
+        android:visibility="gone" />
+
 
     <TextView
         android:id="@+id/item_receiver_message_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/media_image"
         android:text="This is a sample text where user does  blah blah"
         android:textColor="@color/black" />
 

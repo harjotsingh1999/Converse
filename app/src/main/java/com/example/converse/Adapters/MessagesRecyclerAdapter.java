@@ -1,10 +1,12 @@
 package com.example.converse.Adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.converse.HelperClasses.MessageItem;
 import com.example.converse.R;
+import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -68,20 +71,40 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
             Log.d(TAG, "onBindViewHolder: called viewType sender "+position);
             holder.senderText.setText(messageItemArrayList.get(position).getMessageText());
 
+            if(messageItemArrayList.get(position).getMessageText().equals(" "))
+                holder.senderText.setVisibility(View.GONE);
+
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
-            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            formatter.setTimeZone(TimeZone.getDefault());
             String text = formatter.format(new Date(Long.parseLong(messageItemArrayList.get(position).getMessageTimestamp())));
 
             holder.senderMessageTime.setText(text);
+
+            if(messageItemArrayList.get(position).getMediaUri()!=null && !messageItemArrayList.get(position).getMediaUri().equals(""))
+            {
+                Picasso.get().load(Uri.parse(messageItemArrayList.get(position).getMediaUri())).into(holder.mediaImage);
+                holder.mediaImage.setVisibility(View.VISIBLE);
+            }
+
         }
         else
         {
             Log.d(TAG, "onBindViewHolder: called viewType receiver "+position);
             holder.receiverText.setText(messageItemArrayList.get(position).getMessageText());
+
+            if(messageItemArrayList.get(position).getMessageText().equals(" "))
+                holder.receiverText.setVisibility(View.GONE);
+
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
-            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            formatter.setTimeZone(TimeZone.getDefault());
             String text = formatter.format(new Date(Long.parseLong(messageItemArrayList.get(position).getMessageTimestamp())));
             holder.receiverMessageTime.setText(text);
+
+            if(messageItemArrayList.get(position).getMediaUri()!=null && !messageItemArrayList.get(position).getMediaUri().equals(""))
+            {
+                Picasso.get().load(Uri.parse(messageItemArrayList.get(position).getMediaUri())).into(holder.mediaImage);
+                holder.mediaImage.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -92,7 +115,8 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
 
     static class MessagesViewHolder extends RecyclerView.ViewHolder{
 
-        TextView senderText, senderMessageTime, receiverText, receiverMessageTime;
+        TextView senderText, senderMessageTime, receiverText, receiverMessageTime, senderNameTextView;
+        ImageView mediaImage;
         int mViewType;
         public MessagesViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
@@ -101,10 +125,14 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
             if(viewType==VIEW_TYPE_SENDER) {
                 senderText = itemView.findViewById(R.id.item_sender_message_text);
                 senderMessageTime = itemView.findViewById(R.id.item_sender_message_time);
+                senderMessageTime=itemView.findViewById(R.id.sender_name_text_view);
+                mediaImage=itemView.findViewById(R.id.media_image);
             }
             else {
                 receiverText = itemView.findViewById(R.id.item_receiver_message_text);
                 receiverMessageTime = itemView.findViewById(R.id.item_receiver_message_time);
+                senderMessageTime=itemView.findViewById(R.id.sender_name_text_view);
+                mediaImage=itemView.findViewById(R.id.media_image);
             }
         }
     }

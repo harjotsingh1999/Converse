@@ -2,7 +2,7 @@ package com.example.converse.HelperClasses;
 
 public class MessageItem {
 
-    String messageId, messageText, messageSenderId, messageTimestamp;
+    String messageId, messageText, messageSenderId, messageTimestamp, mediaUri;
 
     public MessageItem() {
     }
@@ -13,11 +13,19 @@ public class MessageItem {
         this.messageTimestamp = messageTimestamp;
     }
 
-    public MessageItem(String messageId, String messageText, String messageSenderId, String messageTimestamp) {
+    public MessageItem(String messageText, String messageSenderId, String messageTimestamp, String mediaUri) {
+        this.messageText = messageText;
+        this.messageSenderId = messageSenderId;
+        this.messageTimestamp = messageTimestamp;
+        this.mediaUri=mediaUri;
+    }
+
+    public MessageItem(String messageId, String messageText, String messageSenderId, String messageTimestamp, String mediaUri) {
         this.messageId = messageId;
         this.messageText = messageText;
         this.messageSenderId = messageSenderId;
         this.messageTimestamp = messageTimestamp;
+        this.mediaUri=mediaUri;
     }
 
     public String getMessageId() {
@@ -50,5 +58,13 @@ public class MessageItem {
 
     public void setMessageTimestamp(String messageTimestamp) {
         this.messageTimestamp = messageTimestamp;
+    }
+
+    public String getMediaUri() {
+        return mediaUri;
+    }
+
+    public void setMediaUri(String mediaUri) {
+        this.mediaUri = mediaUri;
     }
 }

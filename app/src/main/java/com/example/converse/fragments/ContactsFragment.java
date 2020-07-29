@@ -185,10 +185,10 @@ public class ContactsFragment extends Fragment {
     }
 
     private void checkIfThisUserIsInDatabase(final String phone, final String name) {
-        Log.d(TAG, "checkIfThisUserIsInDatabase: with phone " + phone);
+        //Log.d(TAG, "checkIfThisUserIsInDatabase: with phone " + phone);
 
         for (DataSnapshot dataSnapshot : appUsersDataSnapshot.getChildren()) {
-            Log.d(TAG, "onDataChange: datasnapshot "+dataSnapshot.toString());
+            //Log.d(TAG, "onDataChange: datasnapshot "+dataSnapshot.toString());
             if (dataSnapshot.child("phoneNumber").getValue() != null) {
                 if (dataSnapshot.child("phoneNumber").getValue().toString().contains(phone)) {
                     Log.d(TAG, "onDataChange: this person uses app and is in contacts " + dataSnapshot.toString());
